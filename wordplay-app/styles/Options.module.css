@@ -1,0 +1,16 @@
+.inputContainer {
+    display: flex;
+    flex-direction: row;
+    margin-top: 50px;
+}
+
+.configOptions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.randomBtn {
+    align-items: center;
+    justify-content: center;
+}
