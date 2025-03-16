@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   const dynamicPrompt = `
     Generate a concise, engaging writing exercise prompt (1–3 sentences) with the following characteristics:
-Perspective: ${pov}
+    - Perspective: ${pov}
     - Setting: ${setting}
     - Tone: ${tone}
     - Pacing: ${pacing}
