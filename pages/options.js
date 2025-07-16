@@ -4,7 +4,7 @@ import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
 import { TextField, Box, Button } from "@mui/material";
 import styles from "../styles/Options.module.css";
-import { generatePrompt } from "../services/generatePrompt";
+import { generatePrompt } from "../services/promptService";
 import Alert from "@mui/material/Alert";
 import CheckIcon from "@mui/icons-material/Check";
 
@@ -14,21 +14,35 @@ export default function OptionChips() {
     const [prompt, setPrompt] = useState([]);
     const [hasData, setHasData] = useState(false);
 
-  const filterOptions = {
-    length: ["short length", "medium length", "long length"],
-    pov: ["first pov", "third pov", "second pov"],
-    setting: [
-      "urban setting",
-      "rural setting",
-      "futuristic setting",
-      "historical setting",
-      "fantasy setting",
-    ],
-    tone: ["joyful tone", "suspenseful tone", "sorrowful tone"],
-    pacing: ["slow pacing", "fast pacing", "dynamic pacing"],
-  };
+  const filters = [
+  { name: "short length", category: "length" },
+  { name: "medium length", category: "length" },
+  { name: "long length", category: "length" },
+
+  { name: "first pov", category: "pov" },
+  { name: "third pov", category: "pov" },
+  { name: "second pov", category: "pov" },
+
+  { name: "urban setting", category: "setting" },
+  { name: "rural setting", category: "setting" },
+  { name: "futuristic setting", category: "setting" },
+  { name: "historical setting", category: "setting" },
+  { name: "fantasy setting", category: "setting" },
+
+  { name: "joyful tone", category: "tone" },
+  { name: "suspenseful tone", category: "tone" },
+  { name: "sorrowful tone", category: "tone" },
+
+  { name: "slow pacing", category: "pacing" },
+  { name: "fast pacing", category: "pacing" },
+  { name: "dynamic pacing", category: "pacing" },
+  ];
+  
+  const categories = [...new Set(filters.map((f) => f.category))];
+  console.log(`categories: ${categories}`)
 
   const toggleCategory = (category) => {
+    console.log(`category is ${category}`)
     setExpandedCategory((prev) => (prev === category ? null : category));
   };
 
@@ -44,12 +58,14 @@ export default function OptionChips() {
     if (!expandedCategory) return null;
     return (
       <Stack direction="row" spacing={1} sx={{ marginBottom: 2 }}>
-        {filterOptions[expandedCategory].map((option) => (
+     {filters
+  .filter((f) => f.category === expandedCategory)
+  .map((option) => (
           <Chip
-            key={option}
-            label={option}
-            color={selectedFilters.includes(option) ? "secondary" : "default"}
-            onClick={() => handleFilterClick(option)}
+            key={option.name}
+            label={option.name}
+            color={selectedFilters.includes(option.name) ? "secondary" : "default"}
+            onClick={() => handleFilterClick(option.name)}
           />
         ))}
       </Stack>
@@ -57,18 +73,16 @@ export default function OptionChips() {
   };
 
   const generateRandomFilters = () => {
-    const randomSelections = Object.keys(filterOptions).flatMap((category) => {
-      const options = filterOptions[category];
+    const randomSelections = categories.map((category) => { 
+      const options = filters.filter((f) => f.category === category);
       const randomOption = options[Math.floor(Math.random() * options.length)];
-      return randomOption;
+      return randomOption.name;
     });
     setSelectedFilters(randomSelections);
   };
 
   const requestStoryPrompt = async () => {
-    console.log(selectedFilters);
     const result = await generatePrompt(selectedFilters);
-    console.log(result);
     const dataToDisplay = {
       summary: result?.data?.summary,
       prompt: result?.data?.prompt,
@@ -83,7 +97,7 @@ export default function OptionChips() {
         {renderExpandedOptions()}
         <div className={styles.configOptions}>
           <Stack direction="row" spacing={1} sx={{ marginBottom: 2 }}>
-            {Object.keys(filterOptions).map((category) => (
+           {categories.map((category) => (
               <Chip
                 key={category}
                 label={category}

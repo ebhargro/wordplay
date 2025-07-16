@@ -90,3 +90,7 @@
     flex-direction: column;
   }
 }
+
+.wordplay_name {
+  color: blue;
+}

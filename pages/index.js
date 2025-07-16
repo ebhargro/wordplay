@@ -12,11 +12,11 @@ export default function Home() {
 
       <main>
         <h1 className={styles.title}>
-          welcome to <a href="https://nextjs.org">wordplay</a>
+          welcome to <span className={styles.wordplay_name}>wordplay</span>
         </h1>
 
         <p className={styles.description}>
-          dynamic writing exercises for <b> all </b> 
+         story prompts for <b> writers everywhere </b> 
         </p>
 
         <div className={styles.grid}>
@@ -26,7 +26,7 @@ export default function Home() {
 
       <footer>
         <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
+          href="https://www.linkedin.com/in/ebonyhargro/"
           target="_blank"
           rel="noopener noreferrer"
         >
