@@ -16,7 +16,7 @@ Wordplay is a responsive web and mobile application designed to help users enhan
 ## Technologies Used
 
 - **Frontend:** Next.js, React Native, Tailwind CSS
-- **Backend:** OpenAI API integration
+- **Backend:** OpenAI API, Supabase/Postgres BE + DB
 - **Styling:** Tailwind CSS for responsive and modern design
 
 ---

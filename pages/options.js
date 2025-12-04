@@ -39,18 +39,16 @@ export default function OptionChips() {
   ];
   
   const categories = [...new Set(filters.map((f) => f.category))];
-  console.log(`categories: ${categories}`)
 
   const toggleCategory = (category) => {
-    console.log(`category is ${category}`)
     setExpandedCategory((prev) => (prev === category ? null : category));
   };
 
   const handleFilterClick = (filter) => {
     setSelectedFilters((prev) =>
-      prev.includes(filter)
-        ? prev.filter((item) => item !== filter)
-        : [...prev, filter]
+      prev.includes(filter.category)
+        ? prev.filter((item) => !item.includes(filter?.category))
+        : [...prev, filter.name]
     );
   };
 
@@ -65,7 +63,8 @@ export default function OptionChips() {
             key={option.name}
             label={option.name}
             color={selectedFilters.includes(option.name) ? "secondary" : "default"}
-            onClick={() => handleFilterClick(option.name)}
+      onClick={() => handleFilterClick(option)}
+      className={styles.optionChip}
           />
         ))}
       </Stack>
@@ -102,7 +101,8 @@ export default function OptionChips() {
                 key={category}
                 label={category}
                 color={expandedCategory === category ? "primary" : "default"}
-                onClick={() => toggleCategory(category)}
+               onClick={() => toggleCategory(category)}
+               className={styles.optionChip}
               />
             ))}
           </Stack>

@@ -10,6 +10,10 @@
     align-items: center;
 }
 
+.optionChip {
+    border: 1.5px solid black;
+}
+
 .randomBtn {
     align-items: center;
     justify-content: center;
