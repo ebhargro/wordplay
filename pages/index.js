@@ -1,8 +1,37 @@
-import Head from 'next/head';
-import styles from '../styles/Home.module.css';
-import  OptionChips  from './options';
+import { useState, useEffect } from "react";
+import Head from "next/head";
+import styles from "../styles/Home.module.css";
+import OptionChips from "./options";
+import CircularProgress from "@mui/material/CircularProgress";
+import { Prompt } from "./prompt";
+
+// type ViewMode = {
+//   SELECTION: 'SELECTION',
+//   PROMPT: 'PROMPT'
+// }
 
 export default function Home() {
+  const [viewMode, setViewMode] = useState("DEFAULT");
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [hasPromptData, setHasPromptData] = useState(false);
+  const [prompt, setPrompt] = useState(null);
+  const [hasRandomStorySetting, setHasRandomStorySetting] = useState(false);
+
+  useEffect(() => {
+    if (isLoadingData) {
+      setViewMode("LOADING")
+    }
+    else if (prompt && hasPromptData) {
+      setViewMode("PROMPT");
+    } else setViewMode("DEFAULT")
+  }, [prompt, hasPromptData, isLoadingData]);
+
+  const handleStoryClick = (randomPreference) => {
+    setHasRandomStorySetting(randomPreference);
+    setViewMode("SELECTION")
+  }
+
+
   return (
     <div className={styles.container}>
       <Head>
@@ -11,16 +40,36 @@ export default function Home() {
       </Head>
 
       <main>
-        <h1 className={styles.title}>
+       
+        {viewMode === "DEFAULT" && 
+          <>
+           <h1 className={styles.title}>
           welcome to <span className={styles.wordplay_name}>wordplay</span>
         </h1>
 
         <p className={styles.description}>
-         story prompts for <b> writers everywhere </b> 
+          creative playground for <b> writers everywhere </b>
         </p>
+        <p className={styles.description}>
+         choose your adventure:
+        </p>
+        <p className={styles.description}>
+       <button onClick={() => {handleStoryClick(false)}}> i want to pick what kind of story I want </button>  ... or <button onClick={()=> {handleStoryClick(true)}}> give me a random writing exercise.  </button>
+          </p>
+          </>
+        }
 
         <div className={styles.grid}>
-          <OptionChips />
+          {viewMode === "SELECTION" && (
+            <OptionChips
+              setPrompt={setPrompt}
+              setHasPromptData={setHasPromptData}
+              setIsLoadingData={setIsLoadingData}
+              isRandom={hasRandomStorySetting}
+            />
+          )}
+          {viewMode === "PROMPT" && <Prompt promptToDisplay={prompt} setViewMode={setViewMode} />}
+          {viewMode === "LOADING" && <CircularProgress />}
         </div>
       </main>
 
