@@ -8,9 +8,22 @@ export const generatePrompt = async (selectedFilters) => {
   }, {});
 
   try {
-    const response = await axios.post("/api/generate-prompt", filterPayload);
+    const response = await axios.post("/api/generate-prompt", filterPayload, {
+      timeout: 30000, // 30 second timeout
+    });
     return response;
   } catch (error) {
-    console.error("Error fetching story prompt:", error.message);
+    // Provide meaningful error messages to the UI
+    if (error.response) {
+      const message =
+        error.response.data?.error || "Something went wrong. Please try again.";
+      throw new Error(message);
+    } else if (error.code === "ECONNABORTED") {
+      throw new Error(
+        "Request timed out. Please check your connection and try again."
+      );
+    } else {
+      throw new Error("Unable to connect. Please check your internet connection.");
+    }
   }
 };

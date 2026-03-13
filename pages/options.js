@@ -9,16 +9,11 @@ export default function OptionChips({
   setIsLoadingData,
   setHasPromptData,
   setPrompt,
-  isRandom
+  setError,
+  isRandom,
 }) {
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [selectedFilters, setSelectedFilters] = useState([]);
-
-  useEffect(() => {
-    if (isRandom) {
-      generateRandomFilters();
-    } else return;
-  }, [isRandom])
 
   const filters = [
     { name: "short length", category: "length" },
@@ -46,16 +41,42 @@ export default function OptionChips({
 
   const categories = [...new Set(filters.map((f) => f.category))];
 
+  useEffect(() => {
+    if (isRandom) {
+      const randomSelections = categories.map((category) => {
+        const options = filters.filter((f) => f.category === category);
+        const randomOption =
+          options[Math.floor(Math.random() * options.length)];
+        return randomOption.name;
+      });
+      setSelectedFilters(randomSelections);
+    }
+  }, [isRandom]);
+
+  // Auto-submit when random filters are set
+  useEffect(() => {
+    if (isRandom && selectedFilters.length === categories.length) {
+      requestStoryPrompt(selectedFilters);
+    }
+  }, [selectedFilters, isRandom]);
+
   const toggleCategory = (category) => {
     setExpandedCategory((prev) => (prev === category ? null : category));
   };
 
   const handleFilterClick = (filter) => {
-    setSelectedFilters((prev) =>
-      prev.includes(filter.category)
-        ? prev.filter((item) => !item.includes(filter?.category))
-        : [...prev, filter.name]
-    );
+    setSelectedFilters((prev) => {
+      // Remove any existing filter in the same category
+      const withoutCategory = prev.filter(
+        (item) => !item.includes(filter.category)
+      );
+      // If the clicked filter was already selected, just remove it
+      if (prev.includes(filter.name)) {
+        return withoutCategory;
+      }
+      // Otherwise add the new one
+      return [...withoutCategory, filter.name];
+    });
   };
 
   const renderExpandedOptions = () => {
@@ -79,25 +100,41 @@ export default function OptionChips({
     );
   };
 
-  const generateRandomFilters = () => {
-    const randomSelections = categories.map((category) => {
-      const options = filters.filter((f) => f.category === category);
-      const randomOption = options[Math.floor(Math.random() * options.length)];
-      return randomOption.name;
-    });
-    setSelectedFilters(randomSelections);
-  };
+  const requestStoryPrompt = async (filtersToUse) => {
+    const activeFilters = filtersToUse || selectedFilters;
 
-  const requestStoryPrompt = async () => {
-    setIsLoadingData(true);
-    const result = await generatePrompt(selectedFilters);
-    const dataToDisplay = {
-      summary: result?.data?.summary,
-      prompt: result?.data?.prompt,
-    };
-    setIsLoadingData(false);
-    setPrompt(dataToDisplay);
-    setHasPromptData(true);
+    // Validate that all categories are selected
+    const selectedCategories = activeFilters.map((f) => f.split(" ")[1]);
+    const missingCategories = categories.filter(
+      (c) => !selectedCategories.includes(c)
+    );
+
+    if (missingCategories.length > 0) {
+      if (setError) {
+        setError(
+          `Please select an option for: ${missingCategories.join(", ")}`
+        );
+      }
+      return;
+    }
+
+    try {
+      if (setError) setError(null);
+      setIsLoadingData(true);
+      const result = await generatePrompt(activeFilters);
+      const dataToDisplay = {
+        summary: result?.data?.summary,
+        prompt: result?.data?.prompt,
+      };
+      setIsLoadingData(false);
+      setPrompt(dataToDisplay);
+      setHasPromptData(true);
+    } catch (err) {
+      setIsLoadingData(false);
+      if (setError) {
+        setError(err.message || "Failed to generate prompt. Please try again.");
+      }
+    }
   };
 
   return (
@@ -124,11 +161,17 @@ export default function OptionChips({
             fullWidth
             variant="outlined"
             InputProps={{
+              readOnly: true,
               startAdornment: selectedFilters.map((filter) => (
                 <Chip
                   key={filter}
                   label={filter}
-                  onDelete={() => handleFilterClick(filter)}
+                  onDelete={() =>
+                    handleFilterClick({
+                      name: filter,
+                      category: filter.split(" ")[1],
+                    })
+                  }
                   sx={{ marginRight: 0.5 }}
                 />
               )),
@@ -137,7 +180,8 @@ export default function OptionChips({
           <Button
             variant="contained"
             color="primary"
-            onClick={requestStoryPrompt}
+            onClick={() => requestStoryPrompt()}
+            disabled={selectedFilters.length === 0}
           >
             build my prompt
           </Button>
