@@ -4,7 +4,7 @@ import styles from "../styles/Home.module.css";
 import OptionChips from "./options";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
-import { Prompt } from "./prompt";
+import { Prompt } from "../components/Prompt";
 
 export default function Home() {
   const [viewMode, setViewMode] = useState("DEFAULT");
